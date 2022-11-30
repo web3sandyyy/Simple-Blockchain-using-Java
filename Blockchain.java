@@ -2,56 +2,62 @@ package blockchain;
    
 import static java.lang.Boolean.TRUE;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Blockchain {
 
-//Making variables Global
-
+//Making  functions Global to also use in functions
+//Stores the count of number of blocks
     public static int BlockNo = 0;
+//Stores the user data/input
     public static String transaction;
-    public static Scanner s = new Scanner(System.in);
-    public static int previousHash;
-    public static List <Integer> blocklist = new ArrayList <Integer>();
+//Stores the hashing value of the last second block
+    public static String previousHash;
+//Stores the hashing value of the lastest block
+    public static String blockHash;
+    public static Scanner input = new Scanner(System.in);
+    public static List <String> blockList = new ArrayList <String>();
 
-//Main function to create a hash
-    
-    static void Block (int previousHash, String transactions){
-        Object [] con = {transactions, previousHash};
-        int blockHash = Arrays.hashCode(con);
-        BlockNo++;
-        previousHash = blockHash;
-        blocklist.add(blockHash);
-        System.out.println("Block number = "+ BlockNo + ", Hash = " + blockHash);
+//Main function to convert the data into sha256 hash
+    static void sha256(String p, String q)throws NoSuchAlgorithmException{
+        String blockData = p + q;         
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(blockData.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest){
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            blockHash = sb.toString();
+            BlockNo++;
+            previousHash = blockHash;
+            blockList.add(blockHash);
+            System.out.println("Block number = "+ BlockNo + ", Hash = " + blockHash);
     }
     
-//Function to see the Block Hash and Block number
-
+//Function to view the whole blockchain at once
     static void view(){
-        int n = blocklist.size();
+        int n = blockList.size();
         for(int i=0; i < n; i++){
-            System.out.println("Block number: " + (i+1) + " ,Blockchain hash: "+ blocklist.get(i));
+            System.out.println("Block number: " + (i+1) + " ,Blockchain hash: "+ blockList.get(i));
         }
     }
     
-    public static void main(String[] args) {
-
-//Creating the Genesis Block
-
+    public static void main(String[] args) throws NoSuchAlgorithmException{
         System.out.println("Enter the transaction: ");
-        transaction = s.nextLine();
-        Block(0, transaction);
-        
+        transaction = input.nextLine();
+        sha256("0", transaction);
         while(TRUE){
         System.out.println("Type \"1\" = Add another Block , \"2\" = View the Blockchain, \"3\" to Exit");
-        int decision = s.nextInt();
+        int decision = input.nextInt();
 
             if (decision == 1){
                 System.out.println("Enter the transaction: ");
-                transaction = s.next();
-                Block(previousHash, transaction);
+                transaction = input.next();
+                sha256(previousHash, transaction);
             } else if (decision == 2) {
                 view();
             } else if (decision == 3){
@@ -59,7 +65,6 @@ public class Blockchain {
                 break;
             }else {
                 System.out.println("Wrong input type again!");
-                continue;
             }
         } 
     }

@@ -22,8 +22,11 @@ public class Blockchain {
     public static List <String> blockList = new ArrayList <String>();
 
 //Main function to convert the data into sha256 hash
+//String p is previous hash and String q is transaction
     static void sha256(String p, String q)throws NoSuchAlgorithmException{
-        String blockData = p + q;         
+        long unixTime = System.currentTimeMillis() / 1000L;
+        String timestamp = Long.toString(unixTime);
+        String blockData = timestamp + p + q;         
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(blockData.getBytes());
             byte[] digest = md.digest();
